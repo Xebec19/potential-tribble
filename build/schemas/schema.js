@@ -1,5 +1,0 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var graphql_1 = require("graphql");
-var schema = (0, graphql_1.buildSchema)("\n    type Course {\n        id: ID\n        courseName: String\n        category: String\n        price: Int\n        language: String\n        email: String\n        stack: Stack\n        teachingAssits:[TeachAssist]\n    }\n    type TeachAssis {\n        firstName: String\n        lastName: String\n        experience: Int\n    }\n    enum Stack {\n        WEB\n        MOBILE\n        OTHER\n    }\n\n    type Query {\n        getCourse(id: ID): Course\n    }\n\n    input CourseInput {\n        id: ID\n        courseName: String!\n        category: String\n        price: Int!\n        language: String\n        email: String\n        stack: Stack\n        teachingAssits:[TeachAssist]!\n    }\n\n    input TeachAssistInput{\n        firstName: String\n        lastName: String\n        experience: Int\n    }\n\n    type Mutation {\n        createCourse(input: CourseInput): Course\n    }\n");
-exports.default = schema;
