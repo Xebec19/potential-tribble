@@ -8,5 +8,5 @@ var express_validator_1 = require("express-validator");
 var auth_controllers_1 = require("../controllers/auth.controllers");
 var router = express_1.default.Router();
 router.post("/login", (0, express_validator_1.body)("email").isEmail(), (0, express_validator_1.body)("password").isLength({ min: 5 }), function (req, res) { return (0, auth_controllers_1.login)(req, res); });
-router.post("register", (0, express_validator_1.body)("email").isEmail(), (0, express_validator_1.body)("firstName").trim().isString().notEmpty(), (0, express_validator_1.body)("lastName").escape(), (0, express_validator_1.body)("phone").isLength({ min: 8 }), (0, express_validator_1.body)("password").isLength({ min: 5 }), function (req, res) { return (0, auth_controllers_1.register)(req, res); });
+router.post("/register", (0, express_validator_1.body)("email").isEmail(), (0, express_validator_1.body)("firstName").trim().isString().notEmpty(), (0, express_validator_1.body)("lastName").isString().escape(), (0, express_validator_1.body)("phone").isLength({ min: 8 }), (0, express_validator_1.body)("password").isLength({ min: 5 }), function (req, res) { return (0, auth_controllers_1.register)(req, res); });
 module.exports = router;

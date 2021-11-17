@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
-import { body, validationResult } from "express-validator";
-import { request } from "http";
+import { body } from "express-validator";
 import { login, register } from "../controllers/auth.controllers";
 const router = express.Router();
 
@@ -12,10 +11,10 @@ router.post(
 );
 
 router.post(
-  "register",
+  "/register",
   body("email").isEmail(),
   body("firstName").trim().isString().notEmpty(),
-  body("lastName").escape(),
+  body("lastName").isString().escape(),
   body("phone").isLength({ min: 8 }),
   body("password").isLength({ min: 5 }),
   (req: Request, res: Response) => register(req, res)

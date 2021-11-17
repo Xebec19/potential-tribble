@@ -44,6 +44,7 @@ var executeQuery_1 = require("../db/executeQuery");
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var environments_1 = require("../environments/environments");
 var express_validator_1 = require("express-validator");
+var bcryptjs_1 = __importDefault(require("bcryptjs"));
 /**
  * @route /public/logout
  */
@@ -86,14 +87,14 @@ exports.logout = logout;
  * @route /public/register
  */
 var register = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, _a, firstName, lastName, email, phone, password, errors, rows, userId, token, error_2;
+    var response, _a, firstName, lastName, email, phone, password, hashedPassword, errors, rows, error_2;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 _a = req.body, firstName = _a.firstName, lastName = _a.lastName, email = _a.email, phone = _a.phone, password = _a.password;
                 _b.label = 1;
             case 1:
-                _b.trys.push([1, 5, , 6]);
+                _b.trys.push([1, 4, , 5]);
                 errors = (0, express_validator_1.validationResult)(req);
                 if (!errors.isEmpty()) {
                     throw new Error("Invalid parameters");
@@ -104,23 +105,38 @@ var register = function (req, res) { return __awaiter(void 0, void 0, void 0, fu
                 if (rows[0].count > 0) {
                     throw new Error("User already exists");
                 }
-                return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n          INSERT INTO PUBLIC.BAZAAR_USERS(\n              FIRST_NAME,\n              LAST_NAME,\n              EMAIL,\n              PHONE,\n              PASSWORD,ACCESS)\n              VALUES ($1, $2, $3, $4, $5, 'admin') RETURNING USER_ID;\n          ", [firstName, lastName, email, +phone, password])];
+                return [4 /*yield*/, bcryptjs_1.default.hash(password, 8, function (err, hash) { return __awaiter(void 0, void 0, void 0, function () {
+                        var userId, token;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    if (err)
+                                        throw new Error("error occurred while hashing");
+                                    hashedPassword = hash;
+                                    console.log("--password ", hashedPassword);
+                                    return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n          INSERT INTO PUBLIC.BAZAAR_USERS(\n              FIRST_NAME,\n              LAST_NAME,\n              EMAIL,\n              PHONE,\n              PASSWORD,ACCESS)\n              VALUES ($1, $2, $3, $4, $5, 'admin') RETURNING USER_ID;\n          ", [firstName, lastName, email, +phone, hashedPassword])];
+                                case 1:
+                                    userId = _a.sent();
+                                    token = jsonwebtoken_1.default.sign({
+                                        data: userId.rows[0].user_id,
+                                    }, "" + environments_1.jwtSecret, { expiresIn: "5d" });
+                                    return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n          INSERT INTO PUBLIC.BAZAAR_TOKENS(\n              USER_ID,\n              TOKEN)\n              VALUES ($1, $2);\n          ", [userId.rows[0].user_id, token])];
+                                case 2:
+                                    _a.sent();
+                                    response = {
+                                        message: "User registered successfully",
+                                        status: true,
+                                        data: "Bearer " + token,
+                                    };
+                                    res.status(201).json(response).end();
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
             case 3:
-                userId = _b.sent();
-                token = jsonwebtoken_1.default.sign({
-                    data: userId.rows[0].user_id,
-                }, "" + environments_1.jwtSecret, { expiresIn: "5d" });
-                return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n          INSERT INTO PUBLIC.BAZAAR_TOKENS(\n              USER_ID,\n              TOKEN)\n              VALUES ($1, $2);\n          ", [userId.rows[0].user_id, token])];
-            case 4:
                 _b.sent();
-                response = {
-                    message: "User registered successfully",
-                    status: true,
-                    data: "Bearer " + token,
-                };
-                res.status(201).json(response).end();
-                return [3 /*break*/, 6];
-            case 5:
+                return [3 /*break*/, 5];
+            case 4:
                 error_2 = _b.sent();
                 console.log(error_2.message);
                 response = {
@@ -130,7 +146,7 @@ var register = function (req, res) { return __awaiter(void 0, void 0, void 0, fu
                 };
                 res.status(401).json(response).end();
                 return [2 /*return*/];
-            case 6: return [2 /*return*/];
+            case 5: return [2 /*return*/];
         }
     });
 }); };
@@ -139,40 +155,60 @@ exports.register = register;
  * @route /public/login
  */
 var login = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, _a, email, password, errors, user, token, error_3;
+    var response, _a, email, password, errors, user_1, error_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 _a = req.body, email = _a.email, password = _a.password;
                 _b.label = 1;
             case 1:
-                _b.trys.push([1, 4, , 5]);
+                _b.trys.push([1, 3, , 4]);
                 errors = (0, express_validator_1.validationResult)(req);
                 if (!errors.isEmpty()) {
                     throw new Error("Invalid parameters");
                 }
                 if (!email || !password)
                     throw new Error("email or password couldn't be blank");
-                return [4 /*yield*/, (0, executeQuery_1.executeSql)("SELECT user_id FROM BAZAAR_USERS WHERE LOWER(EMAIL) = LOWER($1) AND ACCESS = 'admin';", ["" + email.trim()])];
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)("SELECT user_id,password FROM BAZAAR_USERS WHERE LOWER(EMAIL) = LOWER($1) AND ACCESS = 'admin';", ["" + email.trim()])];
             case 2:
-                user = _b.sent();
-                if (!user.rows[0]) {
+                user_1 = _b.sent();
+                if (!user_1.rows[0]) {
                     throw new Error("User does not exist");
                 }
-                token = jsonwebtoken_1.default.sign({
-                    data: user.rows[0].user_id,
-                }, "" + environments_1.jwtSecret, { expiresIn: "5d" });
-                return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n        INSERT INTO PUBLIC.BAZAAR_TOKENS(\n            USER_ID,\n            TOKEN)\n            VALUES ($1, $2);\n        ", [user.rows[0].user_id, token])];
+                bcryptjs_1.default.compare(password, user_1.rows[0].password, function (err, result) { return __awaiter(void 0, void 0, void 0, function () {
+                    var token;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (err)
+                                    throw new Error("Password didnt match");
+                                if (!result) {
+                                    response = {
+                                        message: "Password didnt match",
+                                        status: false,
+                                        data: false,
+                                    };
+                                    res.status(408).json(response).end();
+                                    return [2 /*return*/];
+                                }
+                                token = jsonwebtoken_1.default.sign({
+                                    data: user_1.rows[0].user_id,
+                                }, "" + environments_1.jwtSecret, { expiresIn: "5d" });
+                                return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n        INSERT INTO PUBLIC.BAZAAR_TOKENS(\n            USER_ID,\n            TOKEN)\n            VALUES ($1, $2);\n        ", [user_1.rows[0].user_id, token])];
+                            case 1:
+                                _a.sent();
+                                response = {
+                                    message: "User logged in successfully",
+                                    status: true,
+                                    data: "Bearer " + token,
+                                };
+                                res.status(201).json(response).end();
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [3 /*break*/, 4];
             case 3:
-                _b.sent();
-                response = {
-                    message: "User logged in successfully",
-                    status: true,
-                    data: "Bearer " + token,
-                };
-                res.status(201).json(response).end();
-                return [3 /*break*/, 5];
-            case 4:
                 error_3 = _b.sent();
                 console.error(error_3.message);
                 response = {
@@ -182,7 +218,7 @@ var login = function (req, res) { return __awaiter(void 0, void 0, void 0, funct
                 };
                 res.status(408).json(response).end();
                 return [2 /*return*/];
-            case 5: return [2 /*return*/];
+            case 4: return [2 /*return*/];
         }
     });
 }); };
