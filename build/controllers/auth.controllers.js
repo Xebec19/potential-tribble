@@ -113,7 +113,6 @@ var register = function (req, res) { return __awaiter(void 0, void 0, void 0, fu
                                     if (err)
                                         throw new Error("error occurred while hashing");
                                     hashedPassword = hash;
-                                    console.log("--password ", hashedPassword);
                                     return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n          INSERT INTO PUBLIC.BAZAAR_USERS(\n              FIRST_NAME,\n              LAST_NAME,\n              EMAIL,\n              PHONE,\n              PASSWORD,ACCESS)\n              VALUES ($1, $2, $3, $4, $5, 'admin') RETURNING USER_ID;\n          ", [firstName, lastName, email, +phone, hashedPassword])];
                                 case 1:
                                     userId = _a.sent();

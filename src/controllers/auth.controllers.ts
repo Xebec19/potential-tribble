@@ -56,7 +56,6 @@ export const register = async (req: Request, res: Response) => {
     await bcrypt.hash(password, 8, async (err, hash) => {
       if (err) throw new Error("error occurred while hashing");
       hashedPassword = hash;
-      console.log("--password ", hashedPassword);
       const userId = await executeSql(
         `
           INSERT INTO PUBLIC.BAZAAR_USERS(
