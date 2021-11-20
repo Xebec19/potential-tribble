@@ -10,14 +10,4 @@ router.post(
   (req: Request, res: Response) => login(req, res)
 );
 
-router.post(
-  "/register",
-  body("email").isEmail(),
-  body("firstName").trim().isString().notEmpty(),
-  body("lastName").isString().escape(),
-  body("phone").isLength({ min: 8 }),
-  body("password").isLength({ min: 5 }),
-  (req: Request, res: Response) => register(req, res)
-);
-
 module.exports = router;
