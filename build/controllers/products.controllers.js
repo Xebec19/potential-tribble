@@ -36,15 +36,98 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readProducts = void 0;
+exports.insertProduct = exports.getCategories = void 0;
+var express_validator_1 = require("express-validator");
+var executeQuery_1 = require("../db/executeQuery");
 /**
  * @route public/read-products
  * @request {offset=0,limit=30}
  * @response product_id,category_id,product_name,product_image,quantity,created_on,updated_on,status,price,delivery_price,product_desc,gender,country_id
  */
-var readProducts = function (request, response) { return __awaiter(void 0, void 0, void 0, function () {
+//  export const readProducts = async(request:Request,response:Response) => {
+// }
+/**
+ * @type GET
+ * @route /products/get-categories
+ * @access PRIVATE
+ */
+var getCategories = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, rows, error_1;
     return __generator(this, function (_a) {
-        return [2 /*return*/];
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)("SELECT CATEGORY_ID,CATEGORY_NAME FROM BAZAAR_CATEGORIES WHERE STATUS = 'ACTIVE'")];
+            case 1:
+                rows = (_a.sent()).rows;
+                response = {
+                    message: "Fetched categories",
+                    status: true,
+                    data: rows,
+                };
+                res.status(201).json(response).end();
+                return [2 /*return*/];
+            case 2:
+                error_1 = _a.sent();
+                console.log(error_1.message);
+                response = {
+                    message: error_1.message,
+                    status: false,
+                    data: false,
+                };
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
     });
 }); };
-exports.readProducts = readProducts;
+exports.getCategories = getCategories;
+/**
+ * @route /products/insert-product
+ * @parameters productName,categoryId,productImage,quantity,status,price,deliveryPrice,product Description,countryId
+ * @desc insert new product in database
+ * @type PRIVATE
+ */
+var insertProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, errors, _a, productName, categoryId, quantity, status, productImage, price, deliveryPrice, productDesc, countryId, response_1, error_2;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    throw new Error("Invalid parameters");
+                }
+                _a = req.body, productName = _a.productName, categoryId = _a.categoryId, quantity = _a.quantity, status = _a.status, productImage = _a.productImage, price = _a.price, deliveryPrice = _a.deliveryPrice, productDesc = _a.productDesc, countryId = _a.countryId;
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n      INSERT INTO PUBLIC.BAZAAR_PRODUCTS(\n        CATEGORY_ID,\n        PRODUCT_NAME,\n        PRODUCT_IMAGE,\n        QUANTITY,\n        STATUS,\n        PRICE,\n        DELIVERY_PRICE,\n        PRODUCT_DESC\n        )\n        VALUES ($1,$2,$3,$4,$5,$6,$7,$8);", [
+                        categoryId,
+                        productName,
+                        productImage,
+                        quantity,
+                        status,
+                        price,
+                        deliveryPrice,
+                        productDesc,
+                    ])];
+            case 1:
+                _b.sent(); // todo use countryid as well
+                response_1 = {
+                    message: "Added product successfully",
+                    status: true,
+                };
+                res.status(201).json(response_1).end();
+                return [3 /*break*/, 3];
+            case 2:
+                error_2 = _b.sent();
+                console.log("--error ", error_2.stack);
+                response = {
+                    message: error_2.message,
+                    status: false,
+                    data: false,
+                };
+                res.status(401).json(response).end();
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.insertProduct = insertProduct;
