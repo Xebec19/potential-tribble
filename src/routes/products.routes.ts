@@ -1,15 +1,15 @@
 import express, { Request, Response } from "express";
 import { body } from "express-validator";
 import {
+  fetchProducts,
   getCategories,
   insertProduct,
 } from "../controllers/products.controllers";
 
 const router = express.Router();
 
-router.get(
-  "/get-categories",
-  (req: Request, res: Response) => getCategories(req, res)
+router.get("/get-categories", (req: Request, res: Response) =>
+  getCategories(req, res)
 );
 
 router.post(
@@ -24,6 +24,13 @@ router.post(
   body("productDesc").notEmpty().escape(),
   body("countryId").notEmpty().isNumeric(),
   (req: Request, res: Response) => insertProduct(req, res)
+);
+
+router.post(
+  "/fetch-products",
+  body("pageIndex").notEmpty().isNumeric(),
+  body("pageSize").notEmpty().isNumeric(),
+  (req: Request, res: Response) => fetchProducts(req, res)
 );
 
 module.exports = router;

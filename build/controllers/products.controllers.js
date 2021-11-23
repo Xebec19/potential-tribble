@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.insertProduct = exports.getCategories = void 0;
+exports.fetchProducts = exports.insertProduct = exports.getCategories = void 0;
 var express_validator_1 = require("express-validator");
 var executeQuery_1 = require("../db/executeQuery");
 /**
@@ -131,3 +131,48 @@ var insertProduct = function (req, res) { return __awaiter(void 0, void 0, void 
     });
 }); };
 exports.insertProduct = insertProduct;
+/**
+ * @route /products/fetch-products
+ * @access PUBLIC
+ * @type POST
+ * @desc sends a list of products in paginated way
+ */
+var fetchProducts = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, errors, _a, pageIndex, pageSize, rows, response_2, error_3;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    throw new Error("Invalid parameters");
+                }
+                _a = req.body, pageIndex = _a.pageIndex, pageSize = _a.pageSize;
+                if (pageSize > 100 || pageIndex > 100) {
+                    throw new Error("Pagination overflow");
+                }
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n    SELECT PRODUCT_ID as \"id\",\n    PRODUCT_NAME as \"productName\",\n    PRODUCT_IMAGE as \"productImage\",\n    QUANTITY as \"quantity\",\n    (SELECT CATEGORY_NAME\n\t\tFROM BAZAAR_CATEGORIES BC\n\t\tWHERE BC.CATEGORY_ID = BP.CATEGORY_ID) as \"category\", \n    CREATED_ON as \"createdOn\",\n    UPDATED_ON as \"updatedOn\",\n    STATUS as \"status\",\n    PRICE as \"price\",\n    DELIVERY_PRICE as \"deliveryPrice\",\n    PRODUCT_DESC as \"productDescription\",\n    (select country_name from bazaar_countries bc \n\t where bc.country_id = bp.country_id ) as \"country\",\n   count(*) over() as \"totalProducts\"\n    FROM PUBLIC.BAZAAR_PRODUCTS BP\n    LIMIT $1\n    OFFSET $2;\n    ", [+pageSize, +pageIndex * +pageSize])];
+            case 1:
+                rows = (_b.sent()).rows;
+                response_2 = {
+                    message: "Fetched products",
+                    status: true,
+                    data: rows,
+                };
+                res.status(201).json(response_2).end();
+                return [3 /*break*/, 3];
+            case 2:
+                error_3 = _b.sent();
+                console.log(error_3.message);
+                response = {
+                    message: error_3.message,
+                    status: false,
+                    data: false,
+                };
+                res.status(401).json(response).end();
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.fetchProducts = fetchProducts;
