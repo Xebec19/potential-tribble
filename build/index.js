@@ -12,6 +12,7 @@ app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.use("/products", require("./routes/products.routes"));
 app.use("/public", require("./routes/auth.routes"));
+app.use("/category", require("./routes/category.routes"));
 app.listen(port, function () {
     console.log("listening at http://localhost:" + port);
 });

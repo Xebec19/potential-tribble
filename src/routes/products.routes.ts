@@ -32,5 +32,4 @@ router.post(
   body("pageSize").notEmpty().isNumeric(),
   (req: Request, res: Response) => fetchProducts(req, res)
 );
-
 module.exports = router;

@@ -1,17 +1,25 @@
-import { RSA_NO_PADDING } from "constants";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { executeSql } from "../db/executeQuery";
 import { IResponseData } from "../models/response.model";
 
 /**
- * @route public/read-products
- * @request {offset=0,limit=30}
- * @response product_id,category_id,product_name,product_image,quantity,created_on,updated_on,status,price,delivery_price,product_desc,gender,country_id
+ * @type GET
+ * @route /categories/table
+ * @access PRIVATE
  */
-//  export const readProducts = async(request:Request,response:Response) => {
-
-// }
+export const categoryTable = async (req: Request, res: Response) => {
+  let response: IResponseData;
+  const { rows } = await executeSql(
+    "SELECT category_id, category_name, created_on, category_image, status, parent_category_id FROM public.bazaar_categories where status = 'ACTIVE';"
+  );
+  response = {
+    message: "Fetched categories",
+    status: true,
+    data: rows,
+  };
+  res.status(201).json(response).end();
+};
 
 /**
  * @type GET
