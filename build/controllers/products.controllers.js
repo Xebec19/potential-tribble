@@ -36,32 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchProducts = exports.insertProduct = exports.getCategories = exports.categoryTable = void 0;
+exports.fetchProducts = exports.insertProduct = exports.getCategories = void 0;
 var express_validator_1 = require("express-validator");
 var executeQuery_1 = require("../db/executeQuery");
-/**
- * @type GET
- * @route /categories/table
- * @access PRIVATE
- */
-var categoryTable = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, rows;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, (0, executeQuery_1.executeSql)("SELECT category_id, category_name, created_on, category_image, status, parent_category_id FROM public.bazaar_categories where status = 'ACTIVE';")];
-            case 1:
-                rows = (_a.sent()).rows;
-                response = {
-                    message: "Fetched categories",
-                    status: true,
-                    data: rows,
-                };
-                res.status(201).json(response).end();
-                return [2 /*return*/];
-        }
-    });
-}); };
-exports.categoryTable = categoryTable;
 /**
  * @type GET
  * @route /products/get-categories

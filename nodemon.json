@@ -2,5 +2,5 @@
     "watch":["src"],
     "ext":".ts,.js",
     "ignore":[],
-    "exec": "npm run build && DEBUG=express:* node --inspect build/index.js"
+    "exec": "npm run build && node --inspect build/index.js"
 }
