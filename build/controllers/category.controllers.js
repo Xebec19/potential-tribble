@@ -52,7 +52,7 @@ var categoryTable = function (req, res) { return __awaiter(void 0, void 0, void 
                 _a = req.body, _b = _a.pageSize, pageSize = _b === void 0 ? 40 : _b, _c = _a.pageIndex, pageIndex = _c === void 0 ? 0 : _c;
                 offset = (_d = +pageSize * +pageIndex) !== null && _d !== void 0 ? _d : 0;
                 limit = (_e = +pageSize) !== null && _e !== void 0 ? _e : 0;
-                sql = "SELECT category_id, category_name, created_on, category_image, status, parent_category_id FROM  public.bazaar_categories where status = 'ACTIVE' LIMIT " +
+                sql = "SELECT category_id, category_name, created_on, category_image, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories where status = 'ACTIVE' LIMIT " +
                     limit +
                     " OFFSET " +
                     offset;

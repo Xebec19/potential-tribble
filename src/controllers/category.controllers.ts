@@ -13,7 +13,7 @@ export const categoryTable = async (req: Request, res: Response) => {
   const offset = +pageSize * +pageIndex ?? 0;
   const limit = +pageSize ?? 0;
   let sql =
-    "SELECT category_id, category_name, created_on, category_image, status, parent_category_id FROM  public.bazaar_categories where status = 'ACTIVE' LIMIT " +
+    "SELECT category_id, category_name, created_on, category_image, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories where status = 'ACTIVE' LIMIT " +
     limit +
     " OFFSET " +
     offset;
