@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { executeSql } from "../db/executeQuery";
 import { IResponseData } from "../models/response.model";
@@ -142,6 +142,7 @@ export const fetchProducts = async (req: Request, res: Response) => {
       data: rows,
     };
     res.status(201).json(response).end();
+    return;
   } catch (error: any) {
     console.log(error.message);
     response = {
@@ -150,5 +151,29 @@ export const fetchProducts = async (req: Request, res: Response) => {
       data: false,
     };
     res.status(401).json(response).end();
+  }
+};
+
+export const readOne = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { productId } = req.body;
+    const columns =
+      "CATEGORY_ID, PRODUCT_NAME, PRODUCT_IMAGE, QUANTITY,STATUS, PRICE, DELIVERY_PRICE, PRODUCT_DESC";
+    const table = "BAZAAR_PRODUCTS";
+    const whereCondition = "PRODUCT_ID = $1";
+    const sql = `SELECT ${columns} FROM ${table} WHERE ${whereCondition}`;
+    const { rows } = await executeSql(sql, [productId]);
+    const response = {
+      message: "Fetched Product",
+      status: true,
+      data: rows[0],
+    };
+    res.status(201).json(response).end();
+  } catch (error: any) {
+    next(error);
   }
 };

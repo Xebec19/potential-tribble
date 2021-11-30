@@ -20,7 +20,7 @@ export const categoryTable = async (
     const offset = +pageSize * +pageIndex ?? 0;
     const limit = +pageSize ?? 0;
     let sql =
-      "SELECT category_id, category_name, created_on, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories where lower(status) = lower('ACTIVE') LIMIT " +
+      "SELECT category_id, category_name, created_on, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories LIMIT " +
       limit +
       " OFFSET " +
       offset;
@@ -100,7 +100,7 @@ export const updateCategory = async (
     next(error);
   }
 };
-
+ 
 /**
  * @route category/readOne
  * @type POST
@@ -120,14 +120,50 @@ export const readOne = async (
     let response: IResponseData;
     const { categoryId } = req.body;
     const table = "bazaar_categories";
-    const columns = "CATEGORY_NAME,	upper(STATUS) as \"status\",PARENT_CATEGORY_ID";
-    const where = " CATEGORY_ID = $1 AND LOWER(STATUS) = LOWER('active') ";
+    const columns =
+      'CATEGORY_NAME,	upper(STATUS) as "status",PARENT_CATEGORY_ID';
+    const where = " CATEGORY_ID = $1 ";
     const sql = ` SELECT ${columns} from ${table} where ${where}`;
     const { rows } = await executeSql(sql, [categoryId]);
     response = {
       message: "Category fetched",
       status: true,
       data: rows[0],
+    };
+    res.status(201).json(response).end();
+    return;
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+/**
+ * @route /category/options
+ * @type POST
+ * @desc It sends category options that can be set as parent category
+ */
+export const options = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Invalid parameters");
+    }
+    let response: IResponseData;
+    const { categoryId } = req.body;
+    const table = "bazaar_categories";
+    const columns = "category_id, CATEGORY_NAME";
+    const where =
+      " NOT CATEGORY_ID = $1 AND LOWER(STATUS) = LOWER('active') AND PARENT_CATEGORY_ID = 0";
+    const sql = ` SELECT ${columns} from ${table} where ${where}`;
+    const { rows } = await executeSql(sql, [categoryId]);
+    response = {
+      message: "Category options fetched",
+      status: true,
+      data: rows,
     };
     res.status(201).json(response).end();
     return;

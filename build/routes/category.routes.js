@@ -17,4 +17,5 @@ router.post("/update", (0, express_validator_1.body)("categoryId").notEmpty().is
     return (0, category_controllers_1.updateCategory)(req, res, next);
 });
 router.post("/readOne", (0, express_validator_1.body)("categoryId").notEmpty().isNumeric(), function (req, res, next) { return (0, category_controllers_1.readOne)(req, res, next); });
+router.post("/options", (0, express_validator_1.body)("categoryId").optional({ nullable: true }).isNumeric(), function (req, res, next) { return (0, category_controllers_1.options)(req, res, next); });
 module.exports = router;

@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readOne = exports.updateCategory = exports.insertCategory = exports.categoryTable = void 0;
+exports.options = exports.readOne = exports.updateCategory = exports.insertCategory = exports.categoryTable = void 0;
 var express_validator_1 = require("express-validator");
 var executeQuery_1 = require("../db/executeQuery");
 /**
@@ -56,7 +56,7 @@ var categoryTable = function (req, res, next) { return __awaiter(void 0, void 0,
                 _a = req.body, _b = _a.pageSize, pageSize = _b === void 0 ? 40 : _b, _c = _a.pageIndex, pageIndex = _c === void 0 ? 0 : _c;
                 offset = (_d = +pageSize * +pageIndex) !== null && _d !== void 0 ? _d : 0;
                 limit = (_e = +pageSize) !== null && _e !== void 0 ? _e : 0;
-                sql = "SELECT category_id, category_name, created_on, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories where lower(status) = lower('ACTIVE') LIMIT " +
+                sql = "SELECT category_id, category_name, created_on, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories LIMIT " +
                     limit +
                     " OFFSET " +
                     offset;
@@ -175,8 +175,8 @@ var readOne = function (req, res, next) { return __awaiter(void 0, void 0, void 
                 response = void 0;
                 categoryId = req.body.categoryId;
                 table = "bazaar_categories";
-                columns = "CATEGORY_NAME,	upper(STATUS) as \"status\",PARENT_CATEGORY_ID";
-                where = " CATEGORY_ID = $1 AND LOWER(STATUS) = LOWER('active') ";
+                columns = 'CATEGORY_NAME,	upper(STATUS) as "status",PARENT_CATEGORY_ID';
+                where = " CATEGORY_ID = $1 ";
                 sql = " SELECT " + columns + " from " + table + " where " + where;
                 return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [categoryId])];
             case 1:
@@ -197,3 +197,43 @@ var readOne = function (req, res, next) { return __awaiter(void 0, void 0, void 
     });
 }); };
 exports.readOne = readOne;
+/**
+ * @route /category/options
+ * @type POST
+ * @desc It sends category options that can be set as parent category
+ */
+var options = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var errors, response, categoryId, table, columns, where, sql, rows, error_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    throw new Error("Invalid parameters");
+                }
+                response = void 0;
+                categoryId = req.body.categoryId;
+                table = "bazaar_categories";
+                columns = "category_id, CATEGORY_NAME";
+                where = " NOT CATEGORY_ID = $1 AND LOWER(STATUS) = LOWER('active') AND PARENT_CATEGORY_ID = 0";
+                sql = " SELECT " + columns + " from " + table + " where " + where;
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [categoryId])];
+            case 1:
+                rows = (_a.sent()).rows;
+                response = {
+                    message: "Category options fetched",
+                    status: true,
+                    data: rows,
+                };
+                res.status(201).json(response).end();
+                return [2 /*return*/];
+            case 2:
+                error_5 = _a.sent();
+                next(error_5);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.options = options;

@@ -3,6 +3,7 @@ import { body } from "express-validator";
 import {
   categoryTable,
   insertCategory,
+  options,
   readOne,
   updateCategory,
 } from "../controllers/category.controllers";
@@ -36,6 +37,12 @@ router.post(
   "/readOne",
   body("categoryId").notEmpty().isNumeric(),
   (req: Request, res: Response, next: NextFunction) => readOne(req, res, next)
+);
+
+router.post(
+  "/options",
+  body("categoryId").optional({ nullable: true }).isNumeric(),
+  (req: Request, res: Response, next: NextFunction) => options(req, res, next)
 );
 
 module.exports = router;

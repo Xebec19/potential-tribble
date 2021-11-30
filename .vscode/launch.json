@@ -2,5 +2,14 @@
     "name": "Attach to Process",
     "type": "node",
     "request": "attach",
-    "port": 9229
+    "port": 9229,
+    "configurations": [{
+      "name": "Attach by Process ID",
+      "processId": "${command:PickProcess}",
+      "request": "attach",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
+    }]
   }

@@ -1,5 +1,6 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { body } from "express-validator";
+import { readOne } from "../controllers/products.controllers";
 import {
   fetchProducts,
   getCategories,
@@ -31,5 +32,11 @@ router.post(
   body("pageIndex").notEmpty().isNumeric(),
   body("pageSize").notEmpty().isNumeric(),
   (req: Request, res: Response) => fetchProducts(req, res)
+);
+
+router.post(
+  "/readOne",
+  body("productId").notEmpty().isNumeric(),
+  (req: Request, res: Response, next: NextFunction) => readOne(req, res, next)
 );
 module.exports = router;

@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchProducts = exports.insertProduct = exports.getCategories = void 0;
+exports.readOne = exports.fetchProducts = exports.insertProduct = exports.getCategories = void 0;
 var express_validator_1 = require("express-validator");
 var executeQuery_1 = require("../db/executeQuery");
 /**
@@ -153,7 +153,7 @@ var fetchProducts = function (req, res) { return __awaiter(void 0, void 0, void 
                     data: rows,
                 };
                 res.status(201).json(response_2).end();
-                return [3 /*break*/, 3];
+                return [2 /*return*/];
             case 2:
                 error_3 = _b.sent();
                 console.log(error_3.message);
@@ -169,3 +169,33 @@ var fetchProducts = function (req, res) { return __awaiter(void 0, void 0, void 
     });
 }); };
 exports.fetchProducts = fetchProducts;
+var readOne = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var productId, columns, table, whereCondition, sql, rows, response, error_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                productId = req.body.productId;
+                columns = "CATEGORY_ID, PRODUCT_NAME, PRODUCT_IMAGE, QUANTITY,STATUS, PRICE, DELIVERY_PRICE, PRODUCT_DESC";
+                table = "BAZAAR_PRODUCTS";
+                whereCondition = "PRODUCT_ID = $1";
+                sql = "SELECT " + columns + " FROM " + table + " WHERE " + whereCondition;
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [productId])];
+            case 1:
+                rows = (_a.sent()).rows;
+                response = {
+                    message: "Fetched Product",
+                    status: true,
+                    data: rows[0],
+                };
+                res.status(201).json(response).end();
+                return [3 /*break*/, 3];
+            case 2:
+                error_4 = _a.sent();
+                next(error_4);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.readOne = readOne;
