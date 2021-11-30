@@ -36,13 +36,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCategory = exports.insertCategory = exports.categoryTable = void 0;
+exports.readOne = exports.updateCategory = exports.insertCategory = exports.categoryTable = void 0;
 var express_validator_1 = require("express-validator");
 var executeQuery_1 = require("../db/executeQuery");
 /**
  * @type GET
  * @route /categories/table
  * @access PRIVATE
+ * @desc for category table
  */
 var categoryTable = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var response, _a, _b, pageSize, _c, pageIndex, offset, limit, sql, rows, error_1;
@@ -124,7 +125,7 @@ exports.insertCategory = insertCategory;
  *  @desc endpoint to update category
  */
 var updateCategory = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, response, _a, categoryId, categoryName, status, parentId, columns, table, sql, error_3;
+    var errors, response, _a, categoryId, categoryName, status, parentId, table, sql, error_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -135,7 +136,6 @@ var updateCategory = function (req, res, next) { return __awaiter(void 0, void 0
                 }
                 response = void 0;
                 _a = req.body, categoryId = _a.categoryId, categoryName = _a.categoryName, status = _a.status, parentId = _a.parentId;
-                columns = "category_name, status, parent_category_id";
                 table = "bazaar_categories";
                 sql = "UPDATE " + table + " set category_name = $1, status = $2, parent_category_id = $3 WHERE category_id = $4";
                 return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [categoryName, status, parentId, categoryId])];
@@ -156,3 +156,44 @@ var updateCategory = function (req, res, next) { return __awaiter(void 0, void 0
     });
 }); };
 exports.updateCategory = updateCategory;
+/**
+ * @route category/readOne
+ * @type POST
+ * @desc fetches data of one category
+ * @access PRIVATE
+ */
+var readOne = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var errors, response, categoryId, table, columns, where, sql, rows, error_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    throw new Error("Invalid parameters");
+                }
+                response = void 0;
+                categoryId = req.body.categoryId;
+                table = "bazaar_categories";
+                columns = "CATEGORY_NAME,	upper(STATUS) as \"status\",PARENT_CATEGORY_ID";
+                where = " CATEGORY_ID = $1 AND LOWER(STATUS) = LOWER('active') ";
+                sql = " SELECT " + columns + " from " + table + " where " + where;
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [categoryId])];
+            case 1:
+                rows = (_a.sent()).rows;
+                response = {
+                    message: "Category fetched",
+                    status: true,
+                    data: rows[0],
+                };
+                res.status(201).json(response).end();
+                return [2 /*return*/];
+            case 2:
+                error_4 = _a.sent();
+                next(error_4);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.readOne = readOne;

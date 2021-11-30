@@ -7,6 +7,7 @@ import { IResponseData } from "../models/index.model";
  * @type GET
  * @route /categories/table
  * @access PRIVATE
+ * @desc for category table
  */
 export const categoryTable = async (
   req: Request,
@@ -68,7 +69,6 @@ export const insertCategory = async (
   }
 };
 
-
 /**
  *  @route /category/update
  *  @type POST
@@ -87,13 +87,47 @@ export const updateCategory = async (
     }
     let response: IResponseData;
     const { categoryId, categoryName, status, parentId } = req.body;
-    const columns = "category_name, status, parent_category_id";
     const table = "bazaar_categories";
     const sql = `UPDATE ${table} set category_name = $1, status = $2, parent_category_id = $3 WHERE category_id = $4`;
     await executeSql(sql, [categoryName, status, parentId, categoryId]);
     response = {
       message: "Category updated successfully",
       status: true,
+    };
+    res.status(201).json(response).end();
+    return;
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+/**
+ * @route category/readOne
+ * @type POST
+ * @desc fetches data of one category
+ * @access PRIVATE
+ */
+export const readOne = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Invalid parameters");
+    }
+    let response: IResponseData;
+    const { categoryId } = req.body;
+    const table = "bazaar_categories";
+    const columns = "CATEGORY_NAME,	upper(STATUS) as \"status\",PARENT_CATEGORY_ID";
+    const where = " CATEGORY_ID = $1 AND LOWER(STATUS) = LOWER('active') ";
+    const sql = ` SELECT ${columns} from ${table} where ${where}`;
+    const { rows } = await executeSql(sql, [categoryId]);
+    response = {
+      message: "Category fetched",
+      status: true,
+      data: rows[0],
     };
     res.status(201).json(response).end();
     return;
