@@ -55,7 +55,7 @@ var categoryTable = function (req, res, next) { return __awaiter(void 0, void 0,
                 _a = req.body, _b = _a.pageSize, pageSize = _b === void 0 ? 40 : _b, _c = _a.pageIndex, pageIndex = _c === void 0 ? 0 : _c;
                 offset = (_d = +pageSize * +pageIndex) !== null && _d !== void 0 ? _d : 0;
                 limit = (_e = +pageSize) !== null && _e !== void 0 ? _e : 0;
-                sql = "SELECT category_id, category_name, created_on, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories where status = 'ACTIVE' LIMIT " +
+                sql = "SELECT category_id, category_name, created_on, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories where lower(status) = lower('ACTIVE') LIMIT " +
                     limit +
                     " OFFSET " +
                     offset;
@@ -78,6 +78,12 @@ var categoryTable = function (req, res, next) { return __awaiter(void 0, void 0,
     });
 }); };
 exports.categoryTable = categoryTable;
+/**
+ *  @route /category/insert
+ *  @type POST
+ *  @access PRIVATE
+ *  @desc endpoint to insert new category
+ */
 var insertCategory = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var errors, response, _a, categoryName, status, parentId, table, columns, sql, error_2;
     return __generator(this, function (_b) {
@@ -111,6 +117,12 @@ var insertCategory = function (req, res, next) { return __awaiter(void 0, void 0
     });
 }); };
 exports.insertCategory = insertCategory;
+/**
+ *  @route /category/update
+ *  @type POST
+ *  @access PRIVATE
+ *  @desc endpoint to update category
+ */
 var updateCategory = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var errors, response, _a, categoryId, categoryName, status, parentId, columns, table, sql, error_3;
     return __generator(this, function (_b) {
@@ -125,7 +137,7 @@ var updateCategory = function (req, res, next) { return __awaiter(void 0, void 0
                 _a = req.body, categoryId = _a.categoryId, categoryName = _a.categoryName, status = _a.status, parentId = _a.parentId;
                 columns = "category_name, status, parent_category_id";
                 table = "bazaar_categories";
-                sql = "UPDATE " + table + " set category_name = '$1', status = '$2', parent_category_id = $3 WHERE category_id = $4";
+                sql = "UPDATE " + table + " set category_name = $1, status = $2, parent_category_id = $3 WHERE category_id = $4";
                 return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [categoryName, status, parentId, categoryId])];
             case 1:
                 _b.sent();

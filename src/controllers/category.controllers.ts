@@ -19,7 +19,7 @@ export const categoryTable = async (
     const offset = +pageSize * +pageIndex ?? 0;
     const limit = +pageSize ?? 0;
     let sql =
-      "SELECT category_id, category_name, created_on, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories where status = 'ACTIVE' LIMIT " +
+      "SELECT category_id, category_name, created_on, status, parent_category_id, count(*) over() as total FROM  public.bazaar_categories where lower(status) = lower('ACTIVE') LIMIT " +
       limit +
       " OFFSET " +
       offset;
@@ -35,6 +35,12 @@ export const categoryTable = async (
   }
 };
 
+/**
+ *  @route /category/insert
+ *  @type POST
+ *  @access PRIVATE
+ *  @desc endpoint to insert new category
+ */
 export const insertCategory = async (
   req: Request,
   res: Response,
@@ -62,6 +68,13 @@ export const insertCategory = async (
   }
 };
 
+
+/**
+ *  @route /category/update
+ *  @type POST
+ *  @access PRIVATE
+ *  @desc endpoint to update category
+ */
 export const updateCategory = async (
   req: Request,
   res: Response,
@@ -76,7 +89,7 @@ export const updateCategory = async (
     const { categoryId, categoryName, status, parentId } = req.body;
     const columns = "category_name, status, parent_category_id";
     const table = "bazaar_categories";
-    const sql = `UPDATE ${table} set category_name = '$1', status = '$2', parent_category_id = $3 WHERE category_id = $4`;
+    const sql = `UPDATE ${table} set category_name = $1, status = $2, parent_category_id = $3 WHERE category_id = $4`;
     await executeSql(sql, [categoryName, status, parentId, categoryId]);
     response = {
       message: "Category updated successfully",

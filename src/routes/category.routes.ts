@@ -1,6 +1,10 @@
 import express, { NextFunction, Request, Response } from "express";
 import { body } from "express-validator";
-import { categoryTable } from "../controllers/category.controllers";
+import {
+  categoryTable,
+  insertCategory,
+  updateCategory,
+} from "../controllers/category.controllers";
 const router = express.Router();
 router.post(
   "/category-table",
@@ -11,6 +15,20 @@ router.post(
 router.post(
   "/insert",
   body("categoryName").notEmpty().escape(),
-  body("category")
-); // todo make routes for insert and update
+  body("status").notEmpty().escape(),
+  body("parentId").optional({ nullable: true }).isNumeric(),
+  (req: Request, res: Response, next: NextFunction) =>
+    insertCategory(req, res, next)
+);
+
+router.post(
+  "/update",
+  body("categoryId").notEmpty().isNumeric(),
+  body("categoryName").notEmpty().escape(),
+  body("status").notEmpty().escape(),
+  body("parentId").optional({ nullable: true }).isNumeric(),
+  (req: Request, res: Response, next: NextFunction) =>
+    updateCategory(req, res, next)
+);
+
 module.exports = router;
