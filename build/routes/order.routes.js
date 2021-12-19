@@ -10,4 +10,5 @@ var router = express_1.default.Router();
 router.post("/table", (0, express_validator_1.body)("pageSize").notEmpty(), (0, express_validator_1.body)("pageIndex").notEmpty(), function (req, res, next) {
     return (0, orders_controllers_1.ordersTable)(req, res, next);
 });
+router.post("/info", (0, express_validator_1.body)("orderId").notEmpty().isString(), function (req, res, next) { return (0, orders_controllers_1.orderInfo)(req, res, next); });
 module.exports = router;

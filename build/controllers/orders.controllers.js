@@ -36,9 +36,35 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ordersTable = void 0;
+exports.orderInfo = exports.ordersTable = void 0;
 var express_validator_1 = require("express-validator");
 var executeQuery_1 = require("../db/executeQuery");
+var getOrderInfo = function (orderId) { return __awaiter(void 0, void 0, void 0, function () {
+    var sql, rows;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                sql = "SELECT ORDER_ID,\n    USER_ID,\n    PRICE,\n    DELIVERY_PRICE,\n    TOTAL,\n    CREATED_ON,\n    EMAIL,\n    ADDRESS\n    FROM PUBLIC.BAZAAR_ORDER\n    WHERE ORDER_ID = $1 LIMIT 1;";
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, ["" + orderId])];
+            case 1:
+                rows = (_a.sent()).rows;
+                return [2 /*return*/, rows[0]];
+        }
+    });
+}); };
+var getOrderDetails = function (orderId) { return __awaiter(void 0, void 0, void 0, function () {
+    var sql, rows;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                sql = "SELECT OD_ID,\n\tORDER_ID,\n\t(SELECT PRODUCT_NAME\n\t\tFROM BAZAAR_PRODUCTS\n\t\tWHERE PRODUCT_ID = OD.PRODUCT_ID),\n\t(SELECT PRODUCT_IMAGE\n\tFROM BAZAAR_PRODUCTS\n\tWHERE PRODUCT_ID = OD.PRODUCT_ID)\n\tproduct_price,quantity,delivery_price\n\tfrom bazaar_order_details od\n\twhere order_id = $1;";
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, ["" + orderId])];
+            case 1:
+                rows = (_a.sent()).rows;
+                return [2 /*return*/, rows];
+        }
+    });
+}); };
 /**
  * @route /orders/table
  * @type POST
@@ -57,7 +83,7 @@ var ordersTable = function (req, res, next) { return __awaiter(void 0, void 0, v
                     throw new Error("Invalid parameters");
                 }
                 _a = req.body, pageSize = _a.pageSize, pageIndex = _a.pageIndex;
-                sql = "SELECT ORDER_ID,USER_ID,PRICE,\tDELIVERY_PRICE,\tTOTAL,\tCREATED_ON,\tEMAIL,\tADDRESS FROM PUBLIC.BAZAAR_ORDER LIMIT " + pageSize + " OFFSET " + pageSize * pageIndex + ";";
+                sql = "SELECT ORDER_ID,USER_ID,PRICE,\tDELIVERY_PRICE,\tTOTAL,\tCREATED_ON,\tEMAIL,\tADDRESS, COUNT(*) OVER() AS \"totalOrders\" FROM PUBLIC.BAZAAR_ORDER LIMIT " + pageSize + " OFFSET " + pageSize * pageIndex + ";";
                 return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql)];
             case 1:
                 rows = (_b.sent()).rows;
@@ -77,3 +103,43 @@ var ordersTable = function (req, res, next) { return __awaiter(void 0, void 0, v
     });
 }); };
 exports.ordersTable = ordersTable;
+/**
+ * @route /orders/info
+ * @type POST
+ * @access PRIVATE
+ * @desc sends order details
+ */
+var orderInfo = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, errors, orderId, orderDetails, orderItems, error_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, , 4]);
+                response = void 0;
+                errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    throw new Error("Invalid parameters");
+                }
+                orderId = req.body.orderId;
+                return [4 /*yield*/, getOrderInfo(orderId)];
+            case 1:
+                orderDetails = _a.sent();
+                return [4 /*yield*/, getOrderDetails(orderId)];
+            case 2:
+                orderItems = _a.sent();
+                response = {
+                    message: "Order details fetched successfully",
+                    status: true,
+                    data: { orderDetails: orderDetails, orderItems: orderItems },
+                };
+                res.status(201).json(response).end();
+                return [3 /*break*/, 4];
+            case 3:
+                error_2 = _a.sent();
+                next(error_2);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+exports.orderInfo = orderInfo;
