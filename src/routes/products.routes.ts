@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import { body } from "express-validator";
+import { body, query } from "express-validator";
 import { readOne } from "../controllers/products.controllers";
 import {
   fetchProducts,

@@ -28,6 +28,7 @@ export const getCategories = async (req: Request, res: Response) => {
       status: false,
       data: false,
     };
+    res.status(401).json(response).end();
   }
 };
 
@@ -154,6 +155,7 @@ export const fetchProducts = async (req: Request, res: Response) => {
   }
 };
 
+// @route: /products/readOne
 export const readOne = async (
   req: Request,
   res: Response,

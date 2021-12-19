@@ -68,6 +68,7 @@ var getCategories = function (req, res) { return __awaiter(void 0, void 0, void 
                     status: false,
                     data: false,
                 };
+                res.status(401).json(response).end();
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
@@ -169,6 +170,7 @@ var fetchProducts = function (req, res) { return __awaiter(void 0, void 0, void 
     });
 }); };
 exports.fetchProducts = fetchProducts;
+// @route: /products/readOne
 var readOne = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var productId, columns, table, whereCondition, sql, rows, response, error_4;
     return __generator(this, function (_a) {
