@@ -2,7 +2,16 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { executeSql } from "../db/executeQuery";
 import { IResponseData } from "../models/response.model";
+import nodemailer from "nodemailer";
+import {
+  accountSid,
+  authToken,
+  phoneNumber,
+  senderEmail,
+} from "../environments/environments";
+import twilio from "twilio";
 
+const client = twilio(accountSid, authToken);
 const getOrderInfo = async (orderId: number) => {
   const sql = `SELECT ORDER_ID,
     USER_ID,
@@ -39,6 +48,44 @@ const getOrderDetails = async (orderId: number) => {
 	where order_id = $1;`;
   const { rows } = await executeSql(sql, [`${orderId}`]);
   return rows;
+};
+
+const sendEmail = async (receiver: string, status: string) => {
+  try {
+    let testAccount = await nodemailer.createTestAccount();
+    let transporter = nodemailer.createTransport({
+      name: `${senderEmail}`,
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+    const info = await transporter.sendMail({
+      from: `"Bazaar Admin" <${senderEmail}>`,
+      to: `${receiver}`,
+      subject: "Regarding your order at Bazaar",
+      text: `Your order has been ${status}`,
+    });
+    console.log("Message sent: %s", info.messageId);
+  } catch (error: any) {
+    console.log("--error while sending email:\t", error.stack);
+  }
+};
+
+const sendSms = async (receiver: number, status: string) => {
+  try {
+    const message = await client.messages.create({
+      body: `Your order has been ${status}`,
+      from: `${phoneNumber}`,
+      to: `${receiver}`,
+    });
+    console.log("--SMS send:\t", message.sid);
+  } catch (error: any) {
+    console.log("--error while sending sms:\t", error.stack);
+  }
 };
 
 /**
@@ -113,11 +160,11 @@ export const orderInfo = async (
  * @desc update order status
  */
 export const updateOrderStatus = async (
-  req:Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  try{
+  try {
     let response: IResponseData;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -126,14 +173,18 @@ export const updateOrderStatus = async (
     const { orderId, status } = req.body;
     const sql = `update bazaar_order
     set status = $1
-    where order_id = $2`;
-    await executeSql(sql,[status,orderId]);
+    where order_id = $2 returning email,phone_num`;
+    const { rows } = await executeSql(sql, [status, orderId]);
+    await sendEmail(rows[0].email, status);
+    if (!!rows[0].phone_num) {
+      await sendSms(+rows[0].phone_num, status);
+    }
     response = {
       message: "Order status updated",
-      status: true
-    }
+      status: true,
+    };
     res.status(201).json(response).end();
-  } catch(error:any){
+  } catch (error: any) {
     next(error);
   }
-}
+};
