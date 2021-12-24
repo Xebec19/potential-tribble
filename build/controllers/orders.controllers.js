@@ -57,7 +57,7 @@ var getOrderDetails = function (orderId) { return __awaiter(void 0, void 0, void
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                sql = "SELECT OD_ID,\n\tORDER_ID,\n\t(SELECT PRODUCT_NAME\n\t\tFROM BAZAAR_PRODUCTS\n\t\tWHERE PRODUCT_ID = OD.PRODUCT_ID),\n\t(SELECT PRODUCT_IMAGE\n\tFROM BAZAAR_PRODUCTS\n\tWHERE PRODUCT_ID = OD.PRODUCT_ID)\n\tproduct_price,quantity,delivery_price\n\tfrom bazaar_order_details od\n\twhere order_id = $1;";
+                sql = "SELECT OD_ID,\n\tORDER_ID,\n\t(SELECT PRODUCT_NAME\n\t\tFROM BAZAAR_PRODUCTS\n\t\tWHERE PRODUCT_ID = OD.PRODUCT_ID) as \"name\",\n\t(SELECT PRODUCT_IMAGE\n\tFROM BAZAAR_PRODUCTS\n\tWHERE PRODUCT_ID = OD.PRODUCT_ID) as \"image\",\n  (SELECT PRODUCT_DESC\n    FROM BAZAAR_PRODUCTS\n    WHERE PRODUCT_ID = OD.PRODUCT_ID) as description,\n  (SELECT CATEGORY_NAME FROM BAZAAR_CATEGORIES WHERE CATEGORY_ID = (SELECT CATEGORY_ID FROM BAZAAR_PRODUCTS WHERE \n    PRODUCT_ID = OD.PRODUCT_ID)) AS category,\n\tproduct_price,quantity,delivery_price\n\tfrom bazaar_order_details od\n\twhere order_id = $1;";
                 return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, ["" + orderId])];
             case 1:
                 rows = (_a.sent()).rows;
