@@ -11,7 +11,8 @@ const getOrderInfo = async (orderId: number) => {
     TOTAL,
     CREATED_ON,
     EMAIL,
-    ADDRESS
+    ADDRESS,
+    STATUS
     FROM PUBLIC.BAZAAR_ORDER
     WHERE ORDER_ID = $1 LIMIT 1;`;
   const { rows } = await executeSql(sql, [`${orderId}`]);
@@ -21,6 +22,7 @@ const getOrderInfo = async (orderId: number) => {
 const getOrderDetails = async (orderId: number) => {
   const sql = `SELECT OD_ID,
 	ORDER_ID,
+  PRODUCT_ID,
 	(SELECT PRODUCT_NAME
 		FROM BAZAAR_PRODUCTS
 		WHERE PRODUCT_ID = OD.PRODUCT_ID) as "name",
@@ -103,3 +105,35 @@ export const orderInfo = async (
     next(error);
   }
 };
+
+/**
+ * @route /orders/status
+ * @type POST
+ * @access PRIVATE
+ * @desc update order status
+ */
+export const updateOrderStatus = async (
+  req:Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try{
+    let response: IResponseData;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Invalid parameters");
+    }
+    const { orderId, status } = req.body;
+    const sql = `update bazaar_order
+    set status = $1
+    where order_id = $2`;
+    await executeSql(sql,[status,orderId]);
+    response = {
+      message: "Order status updated",
+      status: true
+    }
+    res.status(201).json(response).end();
+  } catch(error:any){
+    next(error);
+  }
+}

@@ -1,6 +1,10 @@
 import express, { NextFunction, Request, Response } from "express";
 import { body } from "express-validator";
-import { orderInfo, ordersTable } from "../controllers/orders.controllers";
+import {
+  orderInfo,
+  ordersTable,
+  updateOrderStatus,
+} from "../controllers/orders.controllers";
 
 const router = express.Router();
 
@@ -18,4 +22,11 @@ router.post(
   (req: Request, res: Response, next: NextFunction) => orderInfo(req, res, next)
 );
 
+router.post(
+  "/update-status",
+  body("orderId").notEmpty().isString(),
+  body("status").notEmpty().isString(),
+  (req: Request, res: Response, next: NextFunction) =>
+    updateOrderStatus(req, res, next)
+);
 module.exports = router;
