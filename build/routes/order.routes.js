@@ -11,4 +11,7 @@ router.post("/table", (0, express_validator_1.body)("pageSize").notEmpty(), (0, 
     return (0, orders_controllers_1.ordersTable)(req, res, next);
 });
 router.post("/info", (0, express_validator_1.body)("orderId").notEmpty().isString(), function (req, res, next) { return (0, orders_controllers_1.orderInfo)(req, res, next); });
+router.post("/update-status", (0, express_validator_1.body)("orderId").notEmpty().isString(), (0, express_validator_1.body)("status").notEmpty().isString(), function (req, res, next) {
+    return (0, orders_controllers_1.updateOrderStatus)(req, res, next);
+});
 module.exports = router;

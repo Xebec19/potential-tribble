@@ -35,16 +35,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderInfo = exports.ordersTable = void 0;
+exports.updateOrderStatus = exports.orderInfo = exports.ordersTable = void 0;
 var express_validator_1 = require("express-validator");
 var executeQuery_1 = require("../db/executeQuery");
+var nodemailer_1 = __importDefault(require("nodemailer"));
+var environments_1 = require("../environments/environments");
+var twilio_1 = __importDefault(require("twilio"));
+var client = (0, twilio_1.default)(environments_1.accountSid, environments_1.authToken);
 var getOrderInfo = function (orderId) { return __awaiter(void 0, void 0, void 0, function () {
     var sql, rows;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                sql = "SELECT ORDER_ID,\n    USER_ID,\n    PRICE,\n    DELIVERY_PRICE,\n    TOTAL,\n    CREATED_ON,\n    EMAIL,\n    ADDRESS\n    FROM PUBLIC.BAZAAR_ORDER\n    WHERE ORDER_ID = $1 LIMIT 1;";
+                sql = "SELECT ORDER_ID,\n    USER_ID,\n    PRICE,\n    DELIVERY_PRICE,\n    TOTAL,\n    CREATED_ON,\n    EMAIL,\n    ADDRESS,\n    STATUS\n    FROM PUBLIC.BAZAAR_ORDER\n    WHERE ORDER_ID = $1 LIMIT 1;";
                 return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, ["" + orderId])];
             case 1:
                 rows = (_a.sent()).rows;
@@ -57,11 +64,71 @@ var getOrderDetails = function (orderId) { return __awaiter(void 0, void 0, void
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                sql = "SELECT OD_ID,\n\tORDER_ID,\n\t(SELECT PRODUCT_NAME\n\t\tFROM BAZAAR_PRODUCTS\n\t\tWHERE PRODUCT_ID = OD.PRODUCT_ID) as \"name\",\n\t(SELECT PRODUCT_IMAGE\n\tFROM BAZAAR_PRODUCTS\n\tWHERE PRODUCT_ID = OD.PRODUCT_ID) as \"image\",\n  (SELECT PRODUCT_DESC\n    FROM BAZAAR_PRODUCTS\n    WHERE PRODUCT_ID = OD.PRODUCT_ID) as description,\n  (SELECT CATEGORY_NAME FROM BAZAAR_CATEGORIES WHERE CATEGORY_ID = (SELECT CATEGORY_ID FROM BAZAAR_PRODUCTS WHERE \n    PRODUCT_ID = OD.PRODUCT_ID)) AS category,\n\tproduct_price,quantity,delivery_price\n\tfrom bazaar_order_details od\n\twhere order_id = $1;";
+                sql = "SELECT OD_ID,\n\tORDER_ID,\n  PRODUCT_ID,\n\t(SELECT PRODUCT_NAME\n\t\tFROM BAZAAR_PRODUCTS\n\t\tWHERE PRODUCT_ID = OD.PRODUCT_ID) as \"name\",\n\t(SELECT PRODUCT_IMAGE\n\tFROM BAZAAR_PRODUCTS\n\tWHERE PRODUCT_ID = OD.PRODUCT_ID) as \"image\",\n  (SELECT PRODUCT_DESC\n    FROM BAZAAR_PRODUCTS\n    WHERE PRODUCT_ID = OD.PRODUCT_ID) as description,\n  (SELECT CATEGORY_NAME FROM BAZAAR_CATEGORIES WHERE CATEGORY_ID = (SELECT CATEGORY_ID FROM BAZAAR_PRODUCTS WHERE \n    PRODUCT_ID = OD.PRODUCT_ID)) AS category,\n\tproduct_price,quantity,delivery_price\n\tfrom bazaar_order_details od\n\twhere order_id = $1;";
                 return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, ["" + orderId])];
             case 1:
                 rows = (_a.sent()).rows;
                 return [2 /*return*/, rows];
+        }
+    });
+}); };
+var sendEmail = function (receiver, status) { return __awaiter(void 0, void 0, void 0, function () {
+    var testAccount, transporter, info, error_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, , 4]);
+                return [4 /*yield*/, nodemailer_1.default.createTestAccount()];
+            case 1:
+                testAccount = _a.sent();
+                transporter = nodemailer_1.default.createTransport({
+                    name: "" + environments_1.senderEmail,
+                    host: "smtp.ethereal.email",
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: testAccount.user,
+                        pass: testAccount.pass,
+                    },
+                });
+                return [4 /*yield*/, transporter.sendMail({
+                        from: "\"Bazaar Admin\" <" + environments_1.senderEmail + ">",
+                        to: "" + receiver,
+                        subject: "Regarding your order at Bazaar",
+                        text: "Your order has been " + status,
+                    })];
+            case 2:
+                info = _a.sent();
+                console.log("Message sent: %s", info.messageId);
+                return [3 /*break*/, 4];
+            case 3:
+                error_1 = _a.sent();
+                console.log("--error while sending email:\t", error_1.stack);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+var sendSms = function (receiver, status) { return __awaiter(void 0, void 0, void 0, function () {
+    var message, error_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, client.messages.create({
+                        body: "Your order has been " + status,
+                        from: "" + environments_1.phoneNumber,
+                        to: "" + receiver,
+                    })];
+            case 1:
+                message = _a.sent();
+                console.log("--SMS send:\t", message.sid);
+                return [3 /*break*/, 3];
+            case 2:
+                error_2 = _a.sent();
+                console.log("--error while sending sms:\t", error_2.stack);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
     });
 }); };
@@ -72,7 +139,7 @@ var getOrderDetails = function (orderId) { return __awaiter(void 0, void 0, void
  * @desc sends orders in pagination
  */
 var ordersTable = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, errors, _a, pageSize, pageIndex, sql, rows, error_1;
+    var response, errors, _a, pageSize, pageIndex, sql, rows, error_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -95,8 +162,8 @@ var ordersTable = function (req, res, next) { return __awaiter(void 0, void 0, v
                 res.status(201).json(response).end();
                 return [2 /*return*/];
             case 2:
-                error_1 = _b.sent();
-                next(error_1);
+                error_3 = _b.sent();
+                next(error_3);
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
@@ -110,7 +177,7 @@ exports.ordersTable = ordersTable;
  * @desc sends order details
  */
 var orderInfo = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, errors, orderId, orderDetails, orderItems, error_2;
+    var response, errors, orderId, orderDetails, orderItems, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -135,11 +202,57 @@ var orderInfo = function (req, res, next) { return __awaiter(void 0, void 0, voi
                 res.status(201).json(response).end();
                 return [3 /*break*/, 4];
             case 3:
-                error_2 = _a.sent();
-                next(error_2);
+                error_4 = _a.sent();
+                next(error_4);
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
         }
     });
 }); };
 exports.orderInfo = orderInfo;
+/**
+ * @route /orders/status
+ * @type POST
+ * @access PRIVATE
+ * @desc update order status
+ */
+var updateOrderStatus = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, errors, _a, orderId, status, sql, rows, error_5;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 5, , 6]);
+                response = void 0;
+                errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    throw new Error("Invalid parameters");
+                }
+                _a = req.body, orderId = _a.orderId, status = _a.status;
+                sql = "update bazaar_order\n    set status = $1\n    where order_id = $2 returning email,phone_num";
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [status, orderId])];
+            case 1:
+                rows = (_b.sent()).rows;
+                return [4 /*yield*/, sendEmail(rows[0].email, status)];
+            case 2:
+                _b.sent();
+                if (!!!rows[0].phone_num) return [3 /*break*/, 4];
+                return [4 /*yield*/, sendSms(+rows[0].phone_num, status)];
+            case 3:
+                _b.sent();
+                _b.label = 4;
+            case 4:
+                response = {
+                    message: "Order status updated",
+                    status: true,
+                };
+                res.status(201).json(response).end();
+                return [3 /*break*/, 6];
+            case 5:
+                error_5 = _b.sent();
+                next(error_5);
+                return [3 /*break*/, 6];
+            case 6: return [2 /*return*/];
+        }
+    });
+}); };
+exports.updateOrderStatus = updateOrderStatus;

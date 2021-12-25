@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.jwtSecret = exports.dbPassword = exports.dbPort = exports.dbDatabase = exports.dbHost = exports.dbUser = void 0;
+exports.phoneNumber = exports.authToken = exports.accountSid = exports.senderEmail = exports.jwtSecret = exports.dbPassword = exports.dbPort = exports.dbDatabase = exports.dbHost = exports.dbUser = void 0;
 var de = __importStar(require("dotenv"));
 var dotenv = de.config();
 if (dotenv.error) {
@@ -31,3 +31,7 @@ exports.dbDatabase = process.env.DB_DATABASE;
 exports.dbPort = process.env.DB_PORT;
 exports.dbPassword = process.env.DB_PASSWORD;
 exports.jwtSecret = process.env.JWT_SECRET;
+exports.senderEmail = process.env.SENDER_EMAIL;
+exports.accountSid = process.env.TWILIO_ACCOUNT_SID;
+exports.authToken = process.env.TWILIO_AUTH_TOKEN;
+exports.phoneNumber = process.env.TWILIO_PHONE_NUMBER;
