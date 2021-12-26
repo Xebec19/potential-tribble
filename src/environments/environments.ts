@@ -13,3 +13,6 @@ export const senderEmail = process.env.SENDER_EMAIL;
 export const accountSid = process.env.TWILIO_ACCOUNT_SID;
 export const authToken = process.env.TWILIO_AUTH_TOKEN;
 export const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
+export const algoliaAppId = process.env.ALGOLIA_APP_ID;
+export const algoliaAdminKey = process.env.ALGOLIA_ADMIN_KEY;
+export const algoliaIndex = process.env.ALGOLIA_INDEX;

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { executeSql } from "../db/executeQuery";
 import { IResponseData } from "../models/response.model";
+import { updateAlgolia } from "../utils/algolia.utils";
 
 /**
  * @type GET
@@ -46,6 +47,7 @@ export const insertProduct = async (req: Request, res: Response) => {
       throw new Error("Invalid parameters");
     }
     const {
+      productId,
       productName,
       categoryId,
       quantity,
@@ -56,8 +58,36 @@ export const insertProduct = async (req: Request, res: Response) => {
       productDesc,
       countryId,
     } = req.body;
-    await executeSql(
-      `
+    if (!!productId) {
+      const sql = `UPDATE PUBLIC.BAZAAR_PRODUCTS
+      SET 
+        CATEGORY_ID = $1,
+        PRODUCT_NAME = $2,
+        PRODUCT_IMAGE = $3,
+        QUANTITY = $4,
+        CREATED_ON = $5,
+        UPDATED_ON = $6,
+        STATUS = $7,
+        PRICE = $8,
+        DELIVERY_PRICE = $9,
+        PRODUCT_DESC = $10,
+        COUNTRY_ID = 1
+      WHERE PRODUCT_ID = $1 returning PRODUCT_ID ;`;
+      const { rows } = await executeSql(sql, [
+        productId,
+        productName,
+        categoryId,
+        quantity,
+        status,
+        productImage,
+        price,
+        deliveryPrice,
+        productDesc,
+      ]);
+      await updateAlgolia(rows[0].product_id);
+    } else {
+      const { rows } = await executeSql(
+        `
       INSERT INTO PUBLIC.BAZAAR_PRODUCTS(
         CATEGORY_ID,
         PRODUCT_NAME,
@@ -68,18 +98,20 @@ export const insertProduct = async (req: Request, res: Response) => {
         DELIVERY_PRICE,
         PRODUCT_DESC
         )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8);`,
-      [
-        categoryId,
-        productName,
-        productImage,
-        quantity,
-        status,
-        price,
-        deliveryPrice,
-        productDesc,
-      ]
-    ); // todo use countryid as well
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) returning product_id;`,
+        [
+          categoryId,
+          productName,
+          productImage,
+          quantity,
+          status,
+          price,
+          deliveryPrice,
+          productDesc,
+        ]
+      ); // todo use countryid as well
+      await updateAlgolia(rows[0].product_id);
+    }
     const response = {
       message: "Added product successfully",
       status: true,

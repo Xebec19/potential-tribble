@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.readOne = exports.fetchProducts = exports.insertProduct = exports.getCategories = void 0;
 var express_validator_1 = require("express-validator");
 var executeQuery_1 = require("../db/executeQuery");
+var algolia_utils_1 = require("../utils/algolia.utils");
 /**
  * @type GET
  * @route /products/get-categories
@@ -82,35 +83,59 @@ exports.getCategories = getCategories;
  * @type PRIVATE
  */
 var insertProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, errors, _a, productName, categoryId, quantity, status, productImage, price, deliveryPrice, productDesc, countryId, response_1, error_2;
+    var response, errors, _a, productId, productName, categoryId, quantity, status, productImage, price, deliveryPrice, productDesc, countryId, sql, rows, rows, response_1, error_2;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 2, , 3]);
+                _b.trys.push([0, 7, , 8]);
                 errors = (0, express_validator_1.validationResult)(req);
                 if (!errors.isEmpty()) {
                     throw new Error("Invalid parameters");
                 }
-                _a = req.body, productName = _a.productName, categoryId = _a.categoryId, quantity = _a.quantity, status = _a.status, productImage = _a.productImage, price = _a.price, deliveryPrice = _a.deliveryPrice, productDesc = _a.productDesc, countryId = _a.countryId;
-                return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n      INSERT INTO PUBLIC.BAZAAR_PRODUCTS(\n        CATEGORY_ID,\n        PRODUCT_NAME,\n        PRODUCT_IMAGE,\n        QUANTITY,\n        STATUS,\n        PRICE,\n        DELIVERY_PRICE,\n        PRODUCT_DESC\n        )\n        VALUES ($1,$2,$3,$4,$5,$6,$7,$8);", [
-                        categoryId,
+                _a = req.body, productId = _a.productId, productName = _a.productName, categoryId = _a.categoryId, quantity = _a.quantity, status = _a.status, productImage = _a.productImage, price = _a.price, deliveryPrice = _a.deliveryPrice, productDesc = _a.productDesc, countryId = _a.countryId;
+                if (!!!productId) return [3 /*break*/, 3];
+                sql = "UPDATE PUBLIC.BAZAAR_PRODUCTS\n      SET \n        CATEGORY_ID = $1,\n        PRODUCT_NAME = $2,\n        PRODUCT_IMAGE = $3,\n        QUANTITY = $4,\n        CREATED_ON = $5,\n        UPDATED_ON = $6,\n        STATUS = $7,\n        PRICE = $8,\n        DELIVERY_PRICE = $9,\n        PRODUCT_DESC = $10,\n        COUNTRY_ID = 1\n      WHERE PRODUCT_ID = $1 returning PRODUCT_ID ;";
+                return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [
+                        productId,
                         productName,
-                        productImage,
+                        categoryId,
                         quantity,
                         status,
+                        productImage,
                         price,
                         deliveryPrice,
                         productDesc,
                     ])];
             case 1:
-                _b.sent(); // todo use countryid as well
+                rows = (_b.sent()).rows;
+                return [4 /*yield*/, (0, algolia_utils_1.updateAlgolia)(rows[0].product_id)];
+            case 2:
+                _b.sent();
+                return [3 /*break*/, 6];
+            case 3: return [4 /*yield*/, (0, executeQuery_1.executeSql)("\n      INSERT INTO PUBLIC.BAZAAR_PRODUCTS(\n        CATEGORY_ID,\n        PRODUCT_NAME,\n        PRODUCT_IMAGE,\n        QUANTITY,\n        STATUS,\n        PRICE,\n        DELIVERY_PRICE,\n        PRODUCT_DESC\n        )\n        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) returning product_id;", [
+                    categoryId,
+                    productName,
+                    productImage,
+                    quantity,
+                    status,
+                    price,
+                    deliveryPrice,
+                    productDesc,
+                ])];
+            case 4:
+                rows = (_b.sent()).rows;
+                return [4 /*yield*/, (0, algolia_utils_1.updateAlgolia)(rows[0].product_id)];
+            case 5:
+                _b.sent();
+                _b.label = 6;
+            case 6:
                 response_1 = {
                     message: "Added product successfully",
                     status: true,
                 };
                 res.status(201).json(response_1).end();
-                return [3 /*break*/, 3];
-            case 2:
+                return [3 /*break*/, 8];
+            case 7:
                 error_2 = _b.sent();
                 console.log("--error ", error_2.stack);
                 response = {
@@ -119,8 +144,8 @@ var insertProduct = function (req, res) { return __awaiter(void 0, void 0, void 
                     data: false,
                 };
                 res.status(401).json(response).end();
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 8];
+            case 8: return [2 /*return*/];
         }
     });
 }); };

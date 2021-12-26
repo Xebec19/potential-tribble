@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.phoneNumber = exports.authToken = exports.accountSid = exports.senderEmail = exports.jwtSecret = exports.dbPassword = exports.dbPort = exports.dbDatabase = exports.dbHost = exports.dbUser = void 0;
+exports.algoliaIndex = exports.algoliaAdminKey = exports.algoliaAppId = exports.phoneNumber = exports.authToken = exports.accountSid = exports.senderEmail = exports.jwtSecret = exports.dbPassword = exports.dbPort = exports.dbDatabase = exports.dbHost = exports.dbUser = void 0;
 var de = __importStar(require("dotenv"));
 var dotenv = de.config();
 if (dotenv.error) {
@@ -35,3 +35,6 @@ exports.senderEmail = process.env.SENDER_EMAIL;
 exports.accountSid = process.env.TWILIO_ACCOUNT_SID;
 exports.authToken = process.env.TWILIO_AUTH_TOKEN;
 exports.phoneNumber = process.env.TWILIO_PHONE_NUMBER;
+exports.algoliaAppId = process.env.ALGOLIA_APP_ID;
+exports.algoliaAdminKey = process.env.ALGOLIA_ADMIN_KEY;
+exports.algoliaIndex = process.env.ALGOLIA_INDEX;
