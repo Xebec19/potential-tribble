@@ -10,7 +10,6 @@ app.use(cors());
 app.use("/products", require("./routes/products.routes"));
 app.use("/public", require("./routes/auth.routes"));
 app.use("/category", require("./routes/category.routes"));
-app.use("/orders",require("./routes/order.routes"));
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('--error caught : ',err.stack);
