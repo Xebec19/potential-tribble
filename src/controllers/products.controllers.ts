@@ -65,24 +65,23 @@ export const insertProduct = async (req: Request, res: Response) => {
         PRODUCT_NAME = $2,
         PRODUCT_IMAGE = $3,
         QUANTITY = $4,
-        CREATED_ON = $5,
-        UPDATED_ON = $6,
-        STATUS = $7,
-        PRICE = $8,
-        DELIVERY_PRICE = $9,
-        PRODUCT_DESC = $10,
+        UPDATED_ON = now(),
+        STATUS = $5,
+        PRICE = $6,
+        DELIVERY_PRICE = $7,
+        PRODUCT_DESC = $8,
         COUNTRY_ID = 1
-      WHERE PRODUCT_ID = $1 returning PRODUCT_ID ;`;
+      WHERE PRODUCT_ID = $9 returning PRODUCT_ID ;`;
       const { rows } = await executeSql(sql, [
-        productId,
-        productName,
         categoryId,
+        productName,
+        productImage,
         quantity,
         status,
-        productImage,
         price,
         deliveryPrice,
         productDesc,
+        productId,
       ]);
       await updateAlgolia(rows[0].product_id);
     } else {

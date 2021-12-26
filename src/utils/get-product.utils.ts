@@ -10,7 +10,7 @@ export const getProduct = async (productId: number) => {
         QUANTITY,
         STATUS,
         PRICE
-        FROM PUBLIC.BAZAAR_PRODUCTS BP where status = 'active' and quantity > 0 and product_id = $1 limit 1;`;
+        FROM PUBLIC.BAZAAR_PRODUCTS BP where product_id = $1 limit 1;`;
   const { rows } = await executeSql(sql, [`${productId}`]);
   return rows[0];
 };

@@ -12,12 +12,13 @@ const index = client.initIndex(`${algoliaIndex}`);
 export const updateAlgolia = async (productId: number) => {
   const product = await getProduct(productId);
   try {
+    console.log("--product", product);
     if (product.status === "active") {
       index.saveObject(product);
       console.log("Successfully saved product in algolia");
     } else {
       index.deleteObject(product.objectID);
-      console.log('Successfully deleted product from algolia');
+      console.log("Successfully deleted product from algolia");
     }
   } catch (error: any) {
     console.log("--error while updating product in algolia");
