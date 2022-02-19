@@ -12,7 +12,6 @@ app.use((0, cors_1.default)());
 app.use("/products", require("./routes/products.routes"));
 app.use("/public", require("./routes/auth.routes"));
 app.use("/category", require("./routes/category.routes"));
-app.use("/orders", require("./routes/order.routes"));
 app.use(function (err, req, res, next) {
     console.error('--error caught : ', err.stack);
     res.status(500).send("Something broke!").end();

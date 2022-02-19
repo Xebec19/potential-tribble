@@ -94,17 +94,17 @@ var insertProduct = function (req, res) { return __awaiter(void 0, void 0, void 
                 }
                 _a = req.body, productId = _a.productId, productName = _a.productName, categoryId = _a.categoryId, quantity = _a.quantity, status = _a.status, productImage = _a.productImage, price = _a.price, deliveryPrice = _a.deliveryPrice, productDesc = _a.productDesc, countryId = _a.countryId;
                 if (!!!productId) return [3 /*break*/, 3];
-                sql = "UPDATE PUBLIC.BAZAAR_PRODUCTS\n      SET \n        CATEGORY_ID = $1,\n        PRODUCT_NAME = $2,\n        PRODUCT_IMAGE = $3,\n        QUANTITY = $4,\n        CREATED_ON = $5,\n        UPDATED_ON = $6,\n        STATUS = $7,\n        PRICE = $8,\n        DELIVERY_PRICE = $9,\n        PRODUCT_DESC = $10,\n        COUNTRY_ID = 1\n      WHERE PRODUCT_ID = $1 returning PRODUCT_ID ;";
+                sql = "UPDATE PUBLIC.BAZAAR_PRODUCTS\n      SET \n        CATEGORY_ID = $1,\n        PRODUCT_NAME = $2,\n        PRODUCT_IMAGE = $3,\n        QUANTITY = $4,\n        UPDATED_ON = now(),\n        STATUS = $5,\n        PRICE = $6,\n        DELIVERY_PRICE = $7,\n        PRODUCT_DESC = $8,\n        COUNTRY_ID = 1\n      WHERE PRODUCT_ID = $9 returning PRODUCT_ID ;";
                 return [4 /*yield*/, (0, executeQuery_1.executeSql)(sql, [
-                        productId,
-                        productName,
                         categoryId,
+                        productName,
+                        productImage,
                         quantity,
                         status,
-                        productImage,
                         price,
                         deliveryPrice,
                         productDesc,
+                        productId,
                     ])];
             case 1:
                 rows = (_b.sent()).rows;
