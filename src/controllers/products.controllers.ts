@@ -13,7 +13,7 @@ export const getCategories = async (req: Request, res: Response) => {
   let response: IResponseData;
   try {
     const { rows } = await executeSql(
-      "SELECT CATEGORY_ID,CATEGORY_NAME FROM BAZAAR_CATEGORIES WHERE STATUS = 'ACTIVE'"
+      "SELECT CATEGORY_ID,CATEGORY_NAME FROM BAZAAR_CATEGORIES WHERE UPPER(STATUS) = 'ACTIVE'"
     );
     response = {
       message: "Fetched categories",
