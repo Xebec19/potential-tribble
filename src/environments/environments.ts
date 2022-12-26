@@ -1,7 +1,8 @@
-import * as de from "dotenv";
+import * as de from 'dotenv';
+
 const dotenv = de.config();
 if (dotenv.error) {
-  console.error("Error occurred while setting dot env files : ", dotenv.error);
+  console.error('Error occurred while setting dot env files : ', dotenv.error);
 }
 export const dbUser = process.env.DB_USER;
 export const dbHost = process.env.DB_HOST;
