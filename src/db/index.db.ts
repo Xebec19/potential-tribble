@@ -1,18 +1,18 @@
 import { Client } from "pg";
-import {
-  dbDatabase,
-  dbHost,
-  dbPassword,
-  dbPort,
-  dbUser,
-} from "../environments/environments";
+import { dbSource } from "../environments/environments";
 const { Pool } = require("pg");
+// const config = {
+//   user: `${dbUser}`,
+//   host: `${dbHost}`,
+//   database: `${dbDatabase}`,
+//   password: `${dbPassword}`,
+//   port: `${dbPort}`,
+// };
 const config = {
-  user: `${dbUser}`,
-  host: `${dbHost}`,
-  database: `${dbDatabase}`,
-  password: `${dbPassword}`,
-  port: `${dbPort}`,
+  connectionString: dbSource,
+  ssl: {
+    rejectUnauthorized: false
+  }
 };
 const pool = new Pool(config);
 pool.on("error", (err: Error, client: Client) => {
@@ -20,3 +20,6 @@ pool.on("error", (err: Error, client: Client) => {
 });
 console.log(config);
 export const dbQuery = (text: string, params: any) => pool.query(text, params);
+
+
+
